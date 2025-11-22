@@ -13,17 +13,28 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.japp.LogBook"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.japp.LogBook"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "japp",
+    "extra": {
+      "eas": {
+        "projectId": "92901d16-fda0-4505-aa0b-a900adb98c94"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
