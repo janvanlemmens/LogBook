@@ -14,6 +14,8 @@ export const Logging = {
       prestatie1: 'string?',
       prestatie2: 'string?',
       prestatie3: 'string?',
+      urilicenseplate: 'string?',
+      urivin: 'string?',
       opmerking: 'string?',
     },
 

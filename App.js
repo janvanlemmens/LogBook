@@ -9,9 +9,11 @@ import TabsNavigator from "./navigation/TabsNavigator"; // your existing tab nav
 import { RealmProvider } from "@realm/react";
 import { Logging } from "./realm/Schemas";
 
+
 const Stack = createNativeStackNavigator();
 
 function AuthStack({ onLogin }) {
+  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login">
@@ -33,6 +35,7 @@ function AppStack({ onLogout }) {
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
+
   const handleLogin = () => setIsLoggedIn(true);
   const handleLogout = async () => {
     // e.g. clear secure storage, tokens, etc.

@@ -6,6 +6,7 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
+import { Entypo } from "@expo/vector-icons";
 
 const defaultBg = "#c96161ff";
 const defaultText = "#FFFFFF";
@@ -32,6 +33,7 @@ export default function CustomPressable({
   width,
   onPress,
   disabled,
+  icon,
   style,
   textStyle,
   hoverColor, // optional (web only)
@@ -62,11 +64,13 @@ export default function CustomPressable({
           width: width,
           elevation: Platform.OS === "android" ? (pressed ? 2 : 4) : 0,
           shadowOpacity: Platform.OS === "ios" ? (pressed ? 0.12 : 0.2) : 0,
+          flexDirection: "row" ,
         },
         disabled && { opacity: 0.6 },
         style,
       ]}
     >
+      {icon && <Entypo name={icon} size={20} color={textColor} style={{ marginRight: 8 }} />} 
       <Text style={[styles.text, { color: textColor }, textStyle]}>
         {text}
       </Text>

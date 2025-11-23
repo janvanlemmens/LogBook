@@ -118,11 +118,12 @@ const LoginScreen = ({ onLogin }) => {
   }
 
   return (
-     <View style={styles.container}>
-      <KeyboardAvoidingView
+    <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+     <View style={styles.container}>
+      
         <View style={styles.form}>
           <Text style={styles.title}>LogBook</Text>
           <TextInput
@@ -149,15 +150,21 @@ const LoginScreen = ({ onLogin }) => {
             />
           )}
         </View>
-      </KeyboardAvoidingView>
+     
     </View>
+     </KeyboardAvoidingView>
   )
 }
 
 export default LoginScreen
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { 
+  flex: 1, 
+  flexDirection: 'row',
+  alignItems: 'center',     // centers vertically (add if needed)
+  justifyContent: 'center', // centers horizontally
+},
   title: { fontSize: 32, marginBottom: 20, textAlign: "center" },
   input: {
     borderWidth: 1,
@@ -167,8 +174,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   form: {
-    flex: 1,
+  
     justifyContent: "center",
     padding: 16,
+    width: "60%",
+    alignSelf: "center",
+   
   },
 })

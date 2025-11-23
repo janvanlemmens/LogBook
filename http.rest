@@ -6,3 +6,6 @@ Content-Type: application/json
   "user": "scan",
   "password": "scan"
 }
+
+### SAL1A2B4XSA490093
+GET https://db.vin/api/v1/vin/SAL1A2B4XSA490093
