@@ -62,6 +62,7 @@ export default function CustomPressable({
               : color,
           borderRadius,
           width: width,
+         
           elevation: Platform.OS === "android" ? (pressed ? 2 : 4) : 0,
           shadowOpacity: Platform.OS === "ios" ? (pressed ? 0.12 : 0.2) : 0,
           flexDirection: "row" ,
@@ -81,7 +82,7 @@ export default function CustomPressable({
 const styles = StyleSheet.create({
   base: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 6,
     alignItems: "center",
     justifyContent: "center",
      marginBottom: 6,
