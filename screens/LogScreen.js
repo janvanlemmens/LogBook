@@ -21,6 +21,9 @@ const LogScreen = () => {
   const [flash, setFlash] = useState('off');
   const [lines, setLines] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedLicense, setSelectedLicense] = useState("");
+  const [selectedVin, setSelectedVin] = useState("");
+  const [selectedField, setSelectedField] = useState(null); // "licenseplate" or "vin"
 
  useEffect(() => {
   (async () => {
@@ -74,9 +77,20 @@ const LogScreen = () => {
   }
     */}
 
+    const handleResetForm = () => {
+      setSelectedLicense("");
+      setSelectedVin("");
+    }
+
     const handleSelect = (text) => {
-      alert(`You selected: ${text}`);
+      console.log("Selected line:", text);
+      if (selectedField === "licenseplate") {
+        setSelectedLicense(text);
+      } else if (selectedField === "vin") {
+        setSelectedVin(text);
+      } 
       setModalVisible(false);
+      setSelectedField(null);
     }
 
     const extracttext = async (imageUri) => {
@@ -132,6 +146,7 @@ const LogScreen = () => {
                   // Save to media library
                   const asset = await MediaLibrary.createAssetAsync(photo.uri);
                   console.log('Photo saved to media library:', asset.uri);
+                  setSelectedField("licenseplate");
                   extracttext(photo.uri);
                 }
               }}
@@ -146,6 +161,8 @@ const LogScreen = () => {
                   // Save to media library
                   const asset = await MediaLibrary.createAssetAsync(photo.uri);
                   console.log('Photo saved to media library:', asset.uri);
+                  setSelectedField("vin");
+                  extracttext(photo.uri);
                 }
               }}
             />
@@ -179,20 +196,30 @@ const LogScreen = () => {
         <View style={styles.bottomRow}>
          <View style={styles.bottomLeft}>
        {imagel && (
+        <Pressable onPress={() => {
+          setSelectedField("licenseplate");
+          extracttext(imagel)
+        }} >
          <Image
          source={{ uri: imagel }}
          style={styles.previewImage}
           contentFit="cover"   // expo-image prop
          />
+         </Pressable>
        )}
 </View>
           <View style={styles.bottomRight} >
             {imagel && (
+        <Pressable onPress={() => {
+          setSelectedField("vin");
+          extracttext(imagev)
+        }} >
          <Image
          source={{ uri: imagev }}
          style={styles.previewImage}
           contentFit="cover"   // expo-image prop
          />
+         </Pressable>
        )}
           </View>
         </View>
@@ -201,7 +228,12 @@ const LogScreen = () => {
 
       {/* RIGHT COLUMN */}
       <View style={styles.rightColumn} >
-        <VehicleForm />
+        <VehicleForm 
+        onSave={(data) => console.log("Saved vehicle:", data)}
+        licenseplate={selectedLicense}
+        vin={selectedVin}
+        onReset={handleResetForm}
+         />
        </View>
         {/* Modal for selecting a line */}
       <Modal
@@ -244,7 +276,7 @@ const styles = StyleSheet.create({
   },
   bottomLeft: {
     flex: 1,
-    backgroundColor: 'gold',
+    
   },
   previewImage: {
   width: '100%',
@@ -285,7 +317,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 16,
   },
 });
 

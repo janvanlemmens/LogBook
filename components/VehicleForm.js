@@ -1,8 +1,20 @@
-import React, { useState } from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Alert,
+  Pressable,
+  Text,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
-export default function VehicleForm({}) {
+export default function VehicleForm({
+  onSave,
+  licenseplate = "",
+  vin = "",
+  onReset,
+}) {
   const [form, setForm] = useState({
     licenseplate: "",
     vin: "",
@@ -13,9 +25,81 @@ export default function VehicleForm({}) {
     year: "",
   });
 
-  const update = (key, value) => setForm({ ...form, [key]: value });
+  const [lastDecodedVin, setLastDecodedVin] = useState(null);
 
-    const handleSave = () => {
+  // 🔹 User typing / local updates
+  const update = (key, value) => {
+    if (key === "vin" || key === "licenseplate") {
+      value = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  // 🔹 Sync props (from parent) into form, but only when they change
+  useEffect(() => {
+    const cleanLp =
+      (licenseplate || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    const cleanVin = (vin || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+
+    setForm((prev) => {
+      const next = { ...prev };
+
+      // only update if non-empty and actually changed
+      if (cleanLp && cleanLp !== prev.licenseplate) {
+        next.licenseplate = cleanLp;
+      }
+      if (cleanVin && cleanVin !== prev.vin) {
+        next.vin = cleanVin;
+      }
+
+      return next;
+    });
+  }, [licenseplate, vin]);
+
+  // 🔍 Debug log: what vin is REALLY in state
+  useEffect(() => {
+    console.log(
+      "VIN in state (effect):",
+      JSON.stringify(form.vin),
+      "length:",
+      form.vin.length
+    );
+  }, [form.vin]);
+
+  // 🔹 VIN decode when VIN hits 17 chars and is new
+  useEffect(() => {
+    const vin = form.vin.trim();
+    if (vin.length !== 17 || vin === lastDecodedVin) return;
+
+    setLastDecodedVin(vin);
+    console.log("VIN changed, attempting to decode:", vin);
+
+    const fetchVehicleData = async () => {
+      try {
+        const res = await fetch(`https://db.vin/api/v1/vin/${vin}`);
+        const data = await res.json();
+        console.log("VIN decode data:", data);
+
+        setForm((prev) => ({
+          ...prev,
+          make: data.brand || prev.make,
+          model: data.model || prev.model,
+          year: String(data.year || prev.year),
+          color: data.color || prev.color,
+        }));
+      } catch (err) {
+        console.error("Error decoding VIN:", err);
+      }
+    };
+
+    fetchVehicleData();
+  }, [form.vin, lastDecodedVin]);
+
+  const handleSave = () => {
     const vin = form.vin.trim();
     if (vin.length !== 17) {
       Alert.alert("Invalid VIN", "VIN must be exactly 17 characters long.");
@@ -27,12 +111,30 @@ export default function VehicleForm({}) {
       return;
     }
 
-    // You can send `form` to API / storage / parent component
     if (onSave) {
-      onSave(form);
+      try {
+        onSave(form);
+      } catch (e) {
+        console.error("Error in onSave:", e);
+      }
     }
 
     Alert.alert("Saved", "Vehicle data has been saved.");
+  };
+
+  const resetForm = () => {
+    setForm({
+      licenseplate: "",
+      vin: "",
+      make: "",
+      model: "",
+      color: "",
+      mileage: "",
+      year: "",
+    });
+    setLastDecodedVin(null);
+
+    if (onReset) onReset(); // parent can also clear its selectedLicense/selectedVin
   };
 
   return (
@@ -53,9 +155,22 @@ export default function VehicleForm({}) {
           style={styles.input}
           placeholder="VIN Number"
           value={form.vin}
+          maxLength={17}
           onChangeText={(t) => update("vin", t)}
         />
       </View>
+
+      <Text
+        style={{
+          textAlign: "right",
+          fontSize: 12,
+          marginTop: -8,
+          marginBottom: 10,
+          color: form.vin.length === 17 ? "green" : "red",
+        }}
+      >
+        {form.vin.length}/17
+      </Text>
 
       <View style={styles.inputRow}>
         <MaterialIcons name="build" size={22} color="#555" />
@@ -109,29 +224,47 @@ export default function VehicleForm({}) {
           onChangeText={(t) => update("year", t)}
         />
       </View>
+
+      <View
+        style={{ flexDirection: "row", justifyContent: "space-between" }}
+      >
+        <Pressable
+          onPress={handleSave}
+          style={({ pressed }) => [
+            { opacity: pressed ? 0.6 : 1.0 },
+            styles.saveButton,
+          ]}
+        >
+          <MaterialIcons name="save" size={22} color="#fff" />
+          <Text style={styles.saveButtonText}>Save Vehicle</Text>
+        </Pressable>
+        <Pressable
+          onPress={resetForm}
+          style={({ pressed }) => [
+            { opacity: pressed ? 0.6 : 1.0 },
+            styles.saveButton,
+          ]}
+        >
+          <MaterialIcons name="refresh" size={22} color="#fff" />
+          <Text style={styles.saveButtonText}>Clear form</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  rightColumn: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   formContainer: {
     width: "85%",
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 12,
-    elevation: 4, // Android shadow
-    shadowColor: "#000", // iOS shadow
+    elevation: 4,
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
   },
-
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -143,53 +276,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: "#fafafa",
   },
-
   input: {
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
   },
+  saveButton: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#2e86de",
+    paddingVertical: 6,
+    borderRadius: 10,
+    gap: 8,
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
-
-
-{/*
-function decodeVin(vin) {
-  if (!vin || vin.length < 3) return { make: "", modelHint: "" };
-
-  const wmi = vin.slice(0, 3).toUpperCase(); // World Manufacturer Identifier
-
-  const wmiToMake = {
-    WVW: "Volkswagen",
-    WBA: "BMW",
-    WDB: "Mercedes-Benz",
-    WDC: "Mercedes-Benz",
-    WAU: "Audi",
-    VF1: "Renault",
-    VF3: "Peugeot",
-    VF7: "Citroën",
-    VSS: "SEAT",
-    VSK: "Nissan",
-    JHM: "Honda",
-    JHG: "Honda",
-    JTD: "Toyota",
-    JT2: "Toyota",
-    1HG: "Honda",
-    1FA: "Ford",
-    1F1: "Subaru",
-    3VW: "Volkswagen",
-    SAL: "Land Rover",
-    ZFA: "Fiat",
-    ZFF: "Ferrari",
-    YV1: "Volvo",
-  };
-
-  const make = wmiToMake[wmi] || "";
-
-  // Model decoding needs a full VIN database or API,
-  // so here we just return an empty hint or a generic text.
-  const modelHint = make ? `Detected brand: ${make}` : "";
-
-  return { make, modelHint };
-}    
-    
-*/}

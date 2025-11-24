@@ -12,7 +12,7 @@ export default function OcrView({ lines, onSelectLine }) {
           key={index}
           onPress={() => onSelectLine?.(text)}
           style={{
-            paddingVertical: 6,
+            paddingVertical: 12,
             paddingHorizontal: 10,
             backgroundColor: selected === text ? "#cce5ff" : "transparent",
             borderRadius: 5,

@@ -8,4 +8,12 @@ Content-Type: application/json
 }
 
 ### SAL1A2B4XSA490093
-GET https://db.vin/api/v1/vin/SAL1A2B4XSA490093
+GET https://db.vin/api/v1/vin/SJNFDAJ11U1152220
+
+### Register request
+
+POST https://api.automotivapi.com/v1/auth/register 
+  Content-Type: application/json
+  {
+    "email": "jan.vanlemmens@telenet.be"
+    }'
