@@ -230,8 +230,8 @@ const LogScreen = () => {
       <View style={styles.rightColumn} >
         <VehicleForm 
         onSave={(data) => console.log("Saved vehicle:", data)}
-        licenseplate={selectedLicense}
-        vin={selectedVin}
+        parlicenseplate={selectedLicense}
+        parvin={selectedVin}
         onReset={handleResetForm}
          />
        </View>

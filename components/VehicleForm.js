@@ -11,8 +11,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 export default function VehicleForm({
   onSave,
-  licenseplate = "",
-  vin = "",
+  parlicenseplate = "",
+  parvin = "",
   onReset,
 }) {
   const [form, setForm] = useState({
@@ -28,22 +28,23 @@ export default function VehicleForm({
   const [lastDecodedVin, setLastDecodedVin] = useState(null);
 
   // 🔹 User typing / local updates
-  const update = (key, value) => {
-    if (key === "vin" || key === "licenseplate") {
-      value = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    }
+  const update = (key, rawValue) => {
+  let value = rawValue;
+  if (key === "vin" || key === "licenseplate") {
+    value = rawValue.replace(/[^A-Za-z0-9]/g, "");
+  }
+  console.log("prev",form);
+  console.log("updating",key,"to",value);
+  setForm(prev => ({ ...prev, [key]: value }));
+};
 
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+
 
   // 🔹 Sync props (from parent) into form, but only when they change
   useEffect(() => {
     const cleanLp =
-      (licenseplate || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    const cleanVin = (vin || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+      (parlicenseplate || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    const cleanVin = (parvin || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
 
     setForm((prev) => {
       const next = { ...prev };
@@ -58,19 +59,20 @@ export default function VehicleForm({
 
       return next;
     });
-  }, [licenseplate, vin]);
+  }, [parlicenseplate, parvin]);
 
   // 🔍 Debug log: what vin is REALLY in state
-  useEffect(() => {
-    console.log(
-      "VIN in state (effect):",
-      JSON.stringify(form.vin),
-      "length:",
-      form.vin.length
-    );
-  }, [form.vin]);
+  // useEffect(() => {
+  //   console.log(
+  //     "VIN in state (effect):",
+  //     JSON.stringify(form.vin),
+  //     "length:",
+  //     form.vin.length
+  //   );
+  //   console.log("parvin",parvin)
+  // }, [form.vin]);
 
-  // 🔹 VIN decode when VIN hits 17 chars and is new
+  //VIN decode when VIN hits 17 chars and is new
   useEffect(() => {
     const vin = form.vin.trim();
     if (vin.length !== 17 || vin === lastDecodedVin) return;
@@ -155,6 +157,7 @@ export default function VehicleForm({
           style={styles.input}
           placeholder="VIN Number"
           value={form.vin}
+          autoCapitalize="characters"
           maxLength={17}
           onChangeText={(t) => update("vin", t)}
         />
