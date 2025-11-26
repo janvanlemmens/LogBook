@@ -26,6 +26,11 @@ export default function VehicleForm({
   });
 
   const [lastDecodedVin, setLastDecodedVin] = useState(null);
+  const isValid =
+  form.vin.trim().length === 17 &&
+  form.licenseplate.trim().length > 0 &&
+  form.make.trim().length > 0 &&
+  form.model.trim().length > 0;
 
   // 🔹 User typing / local updates
   const update = (key, rawValue) => {
@@ -102,27 +107,35 @@ export default function VehicleForm({
   }, [form.vin, lastDecodedVin]);
 
   const handleSave = () => {
-    const vin = form.vin.trim();
-    if (vin.length !== 17) {
-      Alert.alert("Invalid VIN", "VIN must be exactly 17 characters long.");
-      return;
-    }
+  console.log("HANDLE_SAVE: start");
 
-    if (!form.licenseplate || !form.make || !form.model) {
-      Alert.alert("Missing data", "Please fill license plate, make and model.");
-      return;
-    }
+  const vin = form.vin.trim();
+  if (vin.length !== 17) {
+    //console.log("HANDLE_SAVE: invalid VIN:", vin);
+    Alert.alert("Invalid VIN", "VIN must be exactly 17 characters long.");
+    return;
+  }
 
-    if (onSave) {
-      try {
-        onSave(form);
-      } catch (e) {
-        console.error("Error in onSave:", e);
-      }
-    }
+  if (!form.licenseplate || !form.make || !form.model) {
+    //console.log("HANDLE_SAVE: missing fields:", form);
+    Alert.alert("Missing data", "Please fill license plate, make and model.");
+    return;
+  }
 
-    Alert.alert("Saved", "Vehicle data has been saved.");
-  };
+  //console.log("HANDLE_SAVE: Saving vehicle data:", form);
+
+  if (onSave) {
+    try {
+      //console.log("HANDLE_SAVE: calling onSave");
+      onSave(form);
+    } catch (e) {
+      console.error("HANDLE_SAVE: Error in onSave:", e);
+    }
+  }
+
+  //aAlert.alert("HANDLE_SAVE: Saved", "Vehicle data has been sssaved (from VehicleForm).");
+};
+
 
   const resetForm = () => {
     setForm({
@@ -147,6 +160,7 @@ export default function VehicleForm({
           style={styles.input}
           placeholder="License Plate"
           value={form.licenseplate}
+          autoCapitalize="characters"
           onChangeText={(t) => update("licenseplate", t)}
         />
       </View>
@@ -232,6 +246,7 @@ export default function VehicleForm({
         style={{ flexDirection: "row", justifyContent: "space-between" }}
       >
         <Pressable
+        //disabled={!isValid}
           onPress={handleSave}
           style={({ pressed }) => [
             { opacity: pressed ? 0.6 : 1.0 },

@@ -11,6 +11,8 @@ import CustomPressable from "../components/CustomPressable";
 import { extractTextFromImage, isSupported } from "expo-text-extractor";
 import OcrView from "../components/OcrView";
 import VehicleForm from "../components/VehicleForm";
+import { useRealm } from "@realm/react";
+
 
 const LogScreen = () => {
   const [cameraPermission, setCameraPermission] = useState(null);
@@ -24,6 +26,36 @@ const LogScreen = () => {
   const [selectedLicense, setSelectedLicense] = useState("");
   const [selectedVin, setSelectedVin] = useState("");
   const [selectedField, setSelectedField] = useState(null); // "licenseplate" or "vin"
+
+  const realm = useRealm();
+
+  const handleSaveVehicle = (vehicleData) => {
+    // Create a new Logging object
+    const newLog = {
+      id: new Date().toISOString()+vehicleData.licenseplate, // or use any unique ID generator
+      nrpl: vehicleData.licenseplate,
+      createdAt: new Date(),
+      chassisnr: vehicleData.vin,
+      kmstand: vehicleData.mileage ? parseInt(vehicleData.mileage, 10) : null,
+      merk: vehicleData.make,
+      model: vehicleData.model,
+      kleur: vehicleData.color || "",
+      bouwjaar: vehicleData.year || "",
+      prestatie1: null,
+      prestatie2: null,
+      prestatie3: null,
+      urilicenseplate: imagel || null,  // uit LogScreen state
+      urivin: imagev || null,           // uit LogScreen state
+      opmerking: "",
+    };
+
+    // Write to Realm database
+    realm.write(() => {
+      realm.create("Logging", newLog);
+    });
+
+    console.log("Vehicle saved:", newLog);
+  };
 
  useEffect(() => {
   (async () => {
@@ -229,7 +261,7 @@ const LogScreen = () => {
       {/* RIGHT COLUMN */}
       <View style={styles.rightColumn} >
         <VehicleForm 
-        onSave={(data) => console.log("Saved vehicle:", data)}
+        onSave={handleSaveVehicle}
         parlicenseplate={selectedLicense}
         parvin={selectedVin}
         onReset={handleResetForm}

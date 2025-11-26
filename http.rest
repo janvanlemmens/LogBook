@@ -17,3 +17,10 @@ POST https://api.automotivapi.com/v1/auth/register
   {
     "email": "jan.vanlemmens@telenet.be"
     }'
+
+### SAL1A2B4XSA490093
+GET https://vinspy.eu/check/?vin=SAL1A2B4XSA490093
+
+### scrape
+### SAL1A2B4XSA490093 Beschikbare - data-model
+GET https://www.autogids.be/merk--volkswagen/modellen.html
