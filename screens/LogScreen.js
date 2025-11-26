@@ -55,6 +55,8 @@ const LogScreen = () => {
     });
 
     console.log("Vehicle saved:", newLog);
+    setImagel(null);
+    setImagev(null);
   };
 
  useEffect(() => {
@@ -112,6 +114,8 @@ const LogScreen = () => {
     const handleResetForm = () => {
       setSelectedLicense("");
       setSelectedVin("");
+      setImagel(null);
+     setImagev(null);
     }
 
     const handleSelect = (text) => {

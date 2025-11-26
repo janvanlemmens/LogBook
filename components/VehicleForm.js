@@ -8,12 +8,15 @@ import {
   Text,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRealm } from "@realm/react";
 
 export default function VehicleForm({
   onSave,
   parlicenseplate = "",
   parvin = "",
   onReset,
+  logging,
+  onClose
 }) {
   const [form, setForm] = useState({
     licenseplate: "",
@@ -24,6 +27,7 @@ export default function VehicleForm({
     mileage: "",
     year: "",
   });
+  const realm = useRealm();
 
   const [lastDecodedVin, setLastDecodedVin] = useState(null);
   const isValid =
@@ -43,7 +47,19 @@ export default function VehicleForm({
   setForm(prev => ({ ...prev, [key]: value }));
 };
 
-
+useEffect(() => {
+    if (logging) {
+      setForm({
+        licenseplate: logging.nrpl || "",
+        vin: logging.chassisnr || "",
+        make: logging.merk || "",
+        model: logging.model || "",
+        color: logging.kleur || "",
+        mileage: logging.kmstand ? String(logging.kmstand) : "",
+        year: logging.bouwjaar ? String(logging.bouwjaar) : "",
+      });
+    }
+  }, [logging]);
 
   // 🔹 Sync props (from parent) into form, but only when they change
   useEffect(() => {
@@ -132,7 +148,19 @@ export default function VehicleForm({
       console.error("HANDLE_SAVE: Error in onSave:", e);
     }
   }
-
+  if (logging) {
+    realm.write(() => {
+      logging.nrpl = form.licenseplate;
+      logging.chassisnr = form.vin;
+      logging.merk = form.make;
+      logging.model = form.model;
+      logging.kleur = form.color;
+      logging.kmstand = form.mileage ? parseInt(form.mileage, 10) : null;
+      logging.bouwjaar = form.year ? parseInt(form.year, 10) : null;
+    })
+    if (onClose) onClose();
+  }
+ resetForm();
   //aAlert.alert("HANDLE_SAVE: Saved", "Vehicle data has been sssaved (from VehicleForm).");
 };
 
@@ -150,6 +178,7 @@ export default function VehicleForm({
     setLastDecodedVin(null);
 
     if (onReset) onReset(); // parent can also clear its selectedLicense/selectedVin
+    if (onClose) onClose(); // close the modal if provided
   };
 
   return (
@@ -306,6 +335,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2e86de",
     paddingVertical: 6,
+    paddingHorizontal: 16,
     borderRadius: 10,
     gap: 8,
   },

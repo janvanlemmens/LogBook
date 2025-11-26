@@ -24,3 +24,10 @@ GET https://vinspy.eu/check/?vin=SAL1A2B4XSA490093
 ### scrape
 ### SAL1A2B4XSA490093 Beschikbare - data-model
 GET https://www.autogids.be/merk--volkswagen/modellen.html
+
+### scrape
+GET https://www.vindecoderz.com/EN/check-lookup/SAL1A2B4XSA490093
+
+### JH4KA7561PC008269
+
+GET https://api.api-ninjas.com/v1/vinlookup?vin=JH4KA7561PC008269
